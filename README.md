@@ -10,6 +10,28 @@ triaged todo list instead of a graveyard.
 One note per bookmark, recommend-only. Many bookmarks are just interesting —
 it'll say so rather than inventing busywork.
 
+## Prerequisites
+
+**Required**
+- **An Anthropic API key** — from <https://console.anthropic.com>, pay-as-you-go
+  (pennies per run). ⚠️ A Claude.ai *subscription* (Pro/Max) does **not** include
+  API access; the API is billed separately.
+- **An X/Twitter account** with bookmarks, **a free X developer app** (for OAuth),
+  and a few dollars of X API credit (~$1–3/month at light use).
+- **A persona** — a few sentences describing who you are and what's worth acting
+  on, in `persona.txt` (copy `persona.example.txt`). The app ships **blank**; it
+  knows nothing about you until you tell it. This is the one thing you customize,
+  and it's what makes the triage sharp instead of generic.
+- **Somewhere to run it** — a computer/always-on machine with Python (local mode),
+  or a Google Cloud account (serverless mode).
+
+**Not required**
+- No Airtable/Notion/database — the default output is a plain Markdown file.
+- No subscription to anything beyond the API usage above.
+
+**Skill level:** comfortable in a terminal and editing a config file. This is a
+self-host developer tool, not a one-click app.
+
 ## Why the X API (not Premium / Grok / a browser bot)
 
 - X **Premium / Premium+ / SuperGrok / the Grok API do _not_ give you your
@@ -50,6 +72,11 @@ Scheduler). → see [SETUP.md](SETUP.md) §Deploy.
 Free and open-source Airtable alternatives (NocoDB, Baserow, Teable, Notion,
 Google Sheets) are covered in [SETUP.md](SETUP.md) §Output options — most expose
 an Airtable-style REST API or work via the webhook sink.
+
+> **Pairs with a to-do app:** I run a version of this wired into a small personal
+> to-do web app (a PWA backed by Airtable) — triaged bookmarks land straight in
+> my task list with priority and category, alongside everything else I need to do.
+> If that's interesting to you, ask — I'm happy to share that app too.
 
 ## How it decides what's "new"
 
