@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+*.json.key
+# local state + output (file backend / markdown sink)
+state.json
+state.json.tmp
+bookmarks.md
+# your private persona (ship persona.example.txt instead)
+persona.txt
+# private Cloud Run deploy config (ship deploy.env.example instead)
+deploy.env
