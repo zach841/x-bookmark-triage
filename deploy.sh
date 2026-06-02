@@ -19,7 +19,7 @@ set -a; source deploy.env; set +a
 # Assemble non-secret env. Use a '@' delimiter (^@^) so commas inside JSON
 # (AIRTABLE_FIELD_MAP) and CATEGORIES don't get split by gcloud.
 ENV_PAIRS=()
-add() { [[ -n "${2:-}" ]] && ENV_PAIRS+=("$1=$2"); }
+add() { if [[ -n "${2:-}" ]]; then ENV_PAIRS+=("$1=$2"); fi; }  # always returns 0 (set -e safe)
 add SINK "${SINK:-}"
 add STATE_BACKEND "${STATE_BACKEND:-}"
 add FIREBASE_PROJECT_ID "${FIREBASE_PROJECT_ID:-}"
