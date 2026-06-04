@@ -74,9 +74,10 @@ Google Sheets) are covered in [SETUP.md](SETUP.md) §Output options — most exp
 an Airtable-style REST API or work via the webhook sink.
 
 > **Pairs with a to-do app:** I run a version of this wired into a small personal
-> to-do web app (a PWA backed by Airtable) — triaged bookmarks land straight in
-> my task list with priority and category, alongside everything else I need to do.
-> If that's interesting to you, ask — I'm happy to share that app too.
+> to-do app (works on your phone like a native app, backed by Airtable) — triaged
+> bookmarks land straight in my task list with priority and category, alongside
+> everything else I need to do. If that's interesting to you, ask — I'm happy to
+> share that app too.
 
 ## How it decides what's "new"
 
