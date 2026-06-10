@@ -63,14 +63,22 @@ def run_once() -> dict[str, Any]:
 
         processed = set(state.get_folder_processed())
         new_ids = [i for i in x_client.folder_bookmark_ids(access_token, user_id, folder_id) if i not in processed]
-        new = x_client.get_tweets_by_ids(access_token, new_ids)
-        if not new:
+        if not new_ids:
             return {"status": "ok", "new": 0, "folder": BOOKMARK_FOLDER}
 
-        new = new[:MAX_PER_RUN]
-        results, errors = _process(new, folder=BOOKMARK_FOLDER)
-        state.add_folder_processed([bm["id"] for bm in new])
-        return {"status": "ok", "new": len(new), "created": len(results), "errors": errors, "folder": BOOKMARK_FOLDER}
+        hydrated = x_client.get_tweets_by_ids(access_token, new_ids)
+        hydrated_ids = {bm["id"] for bm in hydrated}
+        batch = hydrated[:MAX_PER_RUN]
+        results, errors = _process(batch, folder=BOOKMARK_FOLDER)
+        # Mark everything we processed PLUS ids X couldn't hydrate (deleted /
+        # protected / suspended — absent from the /2/tweets response). Without
+        # the latter, an unhydratable folder id never lands in the processed set
+        # and re-churns the folder endpoint on every run forever. Any truncated-
+        # but-hydrated tail (only reachable if MAX_PER_RUN < folder size) is left
+        # for the next run.
+        done = [bm["id"] for bm in batch] + [i for i in new_ids if i not in hydrated_ids]
+        state.add_folder_processed(done)
+        return {"status": "ok", "new": len(batch), "created": len(results), "errors": errors, "folder": BOOKMARK_FOLDER}
 
     # --- all-bookmarks mode ------------------------------------------------
     if not st.get("baseline_done"):
@@ -87,11 +95,22 @@ def run_once() -> dict[str, Any]:
     if not new:
         return {"status": "ok", "new": 0}
 
-    new = new[:MAX_PER_RUN]
-    results, errors = _process(new, folder=None)
+    # iter_new_bookmarks yields newest-first and the barrier stops at the FIRST
+    # already-seen id, so the seen set has to stay one contiguous block. When
+    # more than MAX_PER_RUN have piled up, drain the OLDEST chunk first (``new``
+    # is newest-first, so its tail is oldest) and walk the barrier upward from
+    # there. Taking the newest chunk instead (new[:MAX_PER_RUN]) would seal the
+    # barrier above the older remainder, stranding it behind the stop-at-first-
+    # seen boundary permanently. The remainder is picked up on subsequent runs.
+    batch = new[-MAX_PER_RUN:]
+    results, errors = _process(batch, folder=None)
     # Extend the barrier with every id we just saw (processed or errored).
-    state.add_seen_ids([bm["id"] for bm in new])
-    return {"status": "ok", "new": len(new), "created": len(results), "errors": errors}
+    state.add_seen_ids([bm["id"] for bm in batch])
+    out = {"status": "ok", "new": len(batch), "created": len(results), "errors": errors}
+    backlog = len(new) - len(batch)
+    if backlog:
+        out["backlog_remaining"] = backlog  # more runs needed to drain
+    return out
 
 
 def set_baseline(access_token: str, user_id: str) -> int:
